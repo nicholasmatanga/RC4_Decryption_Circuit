@@ -1,0 +1,22 @@
+{
+	"system" : {
+		"platform" : "windows64",
+		"os_name" : "Windows 7",
+		"os_version" : "6.2"
+	},
+	"error" : {
+		"executable" : "quartus_sta",
+		"comment" : "not_applicable",
+		"error_message" : "Unsupported family",
+		"source_file" : "/quartus/tsm/tis/tis_physical_timing_stratixv_lab.cpp",
+		"line" : "489",
+		"stack_trace" : "unknown",
+		"subsystem" : "TIS"
+	},
+	"quartus" : {
+		"quartus_bits" : "64",
+		"version" : "14.1.0",
+		"build" : "186",
+		"edition" : "Web Edition"
+	}
+}
