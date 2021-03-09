@@ -57,17 +57,19 @@ assign data = counter_value;
 endmodule
 
 //////////////// Counter ////////////////////////
-module counter (
+module counter
+#(parameter N = 8)
+(
             input logic clk, reset,count_enable,
-            output logic [7:0] q
+            output logic [N-1:0] q
 );
 
-initial q = 8'b0;
+initial q = 0;
 
 always_ff@(posedge clk, posedge reset)
 begin
-    if(reset)   q<=0;
-    else if(count_enable) q <= q + 1;
+    if(reset)   q <= 0;
+    else if(count_enable) q <= q + 1'b1;
 end
 
 endmodule

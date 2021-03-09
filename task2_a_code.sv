@@ -1,16 +1,16 @@
 `default_nettype none
 module swapping_state_machine (
     input logic clk, start_machine,reset,
-    input logic [7:0] from_memory,
+    input logic [7:0] from_s_memory,
     input logic [7:0] secret_key [2:0],
     output logic [7:0] address, data,
-    output logic wren
+    output logic wren, finish
 );
 
-logic count_enable_2, done, finish_2;
+logic count_enable, done;
 logic [7:0] j_index;
 logic [7:0] i_index;
-logic [2:0] modded_index;
+logic [7:0] modded_index;
 logic [7:0] from_counter;
 logic [7:0] modded_secret_key_value;
 logic [7:0] sum_result;
@@ -44,7 +44,7 @@ initial j_index = 0;
 counter swap_counter(
             .clk(clk),
             .reset(1'b0),
-            .count_enable(count_enable_2),
+            .count_enable(count_enable),
             .q(from_counter)
 );
 
@@ -100,9 +100,9 @@ begin
     case(state)
     MOD_INDEX: modded_index <= i_index % keylength;
     MOD_SECRET: modded_secret_key_value <= secret_key[modded_index];
-    SUM_NUMBERS: sum_result <= j_index + from_memory + modded_secret_key_value;
-    FETCH_SI: si_value <= from_memory;
-    FETCH_AND_TEMP_SJ:  sj_value <= from_memory;
+    SUM_NUMBERS: sum_result <= j_index + from_s_memory + modded_secret_key_value;
+    FETCH_SI: si_value <= from_s_memory;
+    FETCH_AND_TEMP_SJ:  sj_value <= from_s_memory;
     WRITE_SI_TO_SJ: data <= si_value;
     WRITE_SJ_TO_SI: data <= sj_value;
     endcase
@@ -110,9 +110,9 @@ end
  
 ////// Output Logic ///////
 assign wren = state[0];
-assign count_enable_2 = state[1];
+assign count_enable = state[1];
 assign address = state[2] ? j_index : i_index;
-assign finish_2 = state[3];
+assign finish = state[3];
 assign done = (i_index == 8'hFF);
 
 endmodule

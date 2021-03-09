@@ -6,7 +6,7 @@ JedecChain;
 	P ActionCode(Ign)
 		Device PartName(SOCVHPS) MfrSpec(OpMask(0));
 	P ActionCode(Cfg)
-		Device PartName(5CSEMA5F31) Path("C:/Users/User/Desktop/3rd Year Elec, Second Term/Cpen 311/Lab4/template_de1soc/") File("rc4.sof") MfrSpec(OpMask(1));
+		Device PartName(5CSEMA5F31) Path("C:/Users/User/Desktop/Third_Year_Elec/Cpen_311/Lab4/RC4_Decryption_Circuit/") File("rc4.sof") MfrSpec(OpMask(1));
 
 ChainEnd;
 
