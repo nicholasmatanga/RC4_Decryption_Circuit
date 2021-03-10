@@ -2,19 +2,19 @@
 module init_s_memory_state_machine(
         input logic clk,
         output logic [7:0] address, data,
-        output logic wren
+        output logic wren, done
 );
 
-logic count_enable,finish;
+logic count_enable, finish;
 logic [7:0] counter_value;
-logic [3:0] state, next_state;
+logic [4:0] state, next_state;
 
 //////////// State encodings ///////////////
-parameter [3:0] IDLE = 4'b00_00,
-                WRITE_TO_MEM = 4'b00_01,
-                INCREMENT_COUNT = 4'b00_10,
-                CHECK_IF_DONE = 4'b01_00,
-                BUFFER_STATE = 4'b10_00;
+parameter [4:0] IDLE = 5'b100_00,
+                WRITE_TO_MEM = 4'b000_01,
+                INCREMENT_COUNT = 4'b000_10,
+                CHECK_IF_DONE = 4'b001_00,
+                BUFFER_STATE = 4'b010_00;
 
 ///// Specifying starting state of the state machine /////////
 initial state = WRITE_TO_MEM;
@@ -53,6 +53,7 @@ assign wren = state[0];
 assign count_enable = state[1];
 assign address = counter_value;
 assign data = counter_value;
+assign done = state[4];
 
 endmodule
 

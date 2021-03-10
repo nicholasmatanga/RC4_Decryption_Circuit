@@ -90,7 +90,7 @@ begin
                     else next_state = INCREMENT_INDEX;
     INCREMENT_INDEX: next_state = BUFFER_STATE;
     BUFFER_STATE: next_state = MOD_INDEX;
-    FINISH: next_state <= FINISH;
+    FINISH: next_state = FINISH;
     default: next_state = WAIT;
     endcase
 end
