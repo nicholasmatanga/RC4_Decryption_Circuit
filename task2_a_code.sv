@@ -16,34 +16,34 @@ logic [7:0] modded_secret_key_value;
 logic [7:0] sum_result;
 logic [7:0] si_value;
 logic [7:0] sj_value;
-logic [9:0] state, next_state;
+logic [10:0] state, next_state;
 
 
 //////// State Encodings /////////////
-parameter [9:0] WAIT = 10'b0000_000000,
-                MOD_INDEX = 10'b0001_000000,
-                MOD_SECRET = 10'b0010_000000,
-                SUM_NUMBERS = 10'b0011_000000,
-                FETCH_SI = 10'b0100_000000,
-                SWAP_TO_SJ_ADDRESS = 10'b0101_000100,
-                FETCH_AND_TEMP_SJ = 10'b0110_000100,
-                WRITE_SI_TO_SJ = 10'b0111_000101,
-                WAIT_TO_SJ = 10'b1111_000101,
-                SWAP_TO_SI_ADDRESS = 10'b1000_000000,
-                WRITE_SJ_TO_SI = 10'b1001_000001,
-                WAIT_TO_SI = 10'b1101_000001,
-                IS_SWAP_DONE = 10'b1010_000000,
-                FINISH = 10'b1010_001000,
-                BUFFER_STATE = 10'b1110_000000,
-                INCREMENT_INDEX = 10'b1011_000010;
+parameter [10:0] WAIT = 11'b00000_000000,
+                MOD_INDEX = 11'b00001_000000,
+                MOD_SECRET = 11'b00010_000000,
+                SUM_NUMBERS = 11'b00011_000000,
+                FETCH_SI = 11'b00100_000000,
+                SWAP_TO_SJ_ADDRESS = 11'b00101_000100,
+                FETCH_AND_TEMP_SJ = 11'b00110_000100,
+                WRITE_SI_TO_SJ = 11'b00111_000101,
+                WAIT_TO_SJ = 11'b01000_000101,
+                SWAP_TO_SI_ADDRESS = 11'b01001_000000,
+                WRITE_SJ_TO_SI = 11'b01010_000001,
+                WAIT_TO_SI = 11'b01011_000001,
+                IS_SWAP_DONE = 11'b01100_000000,
+                FINISH = 11'b01101_001000,
+                BUFFER_STATE = 11'b01110_000000,
+                INCREMENT_INDEX = 11'b01111_000010;
 
+initial state = WAIT;
 
 parameter [2:0] keylength = 3'b011;
-initial j_index = 0;
 
 counter swap_counter(
             .clk(clk),
-            .reset(1'b0),
+            .reset(reset),
             .count_enable(count_enable),
             .q(from_counter)
 );
@@ -52,7 +52,7 @@ counter swap_counter(
 always_ff@(posedge clk or posedge reset)
 begin
     if(reset) state <= WAIT;
-    else state <=next_state;
+    else state <= next_state;
 end
 
 ////// i index register ///////
@@ -97,6 +97,15 @@ end
 
 always@(posedge clk)
 begin
+    if(reset)
+        begin
+            modded_index <= 0;
+            modded_secret_key_value <= 0;
+            sum_result <= 0;
+            si_value <= 0;
+            sj_value <= 0;
+            data <= 0;
+        end 
     case(state)
     MOD_INDEX: modded_index <= i_index % keylength;
     MOD_SECRET: modded_secret_key_value <= secret_key[modded_index];
@@ -116,9 +125,3 @@ assign finish = state[3];
 assign done = (i_index == 8'hFF);
 
 endmodule
-
-
-
-
-
-

@@ -9,7 +9,7 @@ module ksa (
         HEX2,
         HEX3,
         HEX4,
-        HEX5,
+        HEX5
 );
 /////////////// CLOCK ////////////////////
 input CLOCK_50;
@@ -31,8 +31,9 @@ output [6:0] HEX3;
 output [6:0] HEX4;
 output [6:0] HEX5;
 
-logic clk, start_machine;
-logic [7:0] secret_key [2:0];
+wire [23:0] new_secret;
+wire clk, start_machine, secret_enable;
+wire [7:0] secret_key [2:0];
 wire reset_n, wren, wren_1, wren_2, wren_3, start_decrypting;
 wire [7:0] address, data,address_1,address_2, address_3, data_1, data_2, data_3, rom_q, q;
 wire [7:0] decrypted_output;
@@ -40,21 +41,33 @@ wire [4:0] rom_address,  result_ram_address;
 wire result_ram_wren;
 
 assign clk = CLOCK_50;
-assign secret_key[0] = 8'b0;
-assign secret_key[1] = {6'b0, SW[9:8]};
-assign secret_key[2] = SW[7:0];
-assign reset_n = (!KEY[3]);
+assign secret_key[0] = new_secret[23:16];
+assign secret_key[1] = new_secret[15:8];
+assign secret_key[2] = new_secret[7:0];
 
+// assign secret_key[0] = 8'b0;
+// assign secret_key[1] = {6'b0, SW[9:8]};
+// assign secret_key[2] = SW[7:0];
 
 
 assign address = start_decrypting ? address_3 : (start_machine ? address_2 : address_1);
 assign data = start_decrypting ? data_3 : (start_machine ? data_2 : data_1);
 assign wren = start_decrypting ? wren_3 : (start_machine ? wren_2 : wren_1);
 
+
+//////////////////// Secret Key Counter ///////////////////////////
+counter #(24) increment_secret(
+        .clk(clk),
+        .reset(1'b0),
+        .count_enable(secret_enable),
+        .q(new_secret)
+);
+
 //// State machine that initializes the S memory /////////////////////
 init_s_memory_state_machine
 to_main_s(
     .clk(clk),
+    .reset(reset_n),
     .address(address_1),
     .data(data_1),
     .wren(wren_1),
@@ -89,7 +102,9 @@ visual_message(
     .rom_address(rom_address),
     .result_ram_address(result_ram_address),
     .wren(wren_3),
-    .result_ram_wren(result_ram_wren)
+    .result_ram_wren(result_ram_wren),
+    .secret_enable(secret_enable),
+    .finish(LEDR[0])
 );
 
 ///// S memory instantiation //////////////
@@ -119,5 +134,13 @@ decr_y(
     .wren(result_ram_wren),
     .q()
 );
+
+/////// Seven Segment Display /////////////
+SevenSegmentDisplayDecoder inst_0( .ssOut(HEX0), .nIn(new_secret[3:0]));
+SevenSegmentDisplayDecoder inst_1( .ssOut(HEX1), .nIn(new_secret[7:4]));
+SevenSegmentDisplayDecoder inst_2( .ssOut(HEX2), .nIn(new_secret[11:8]));
+SevenSegmentDisplayDecoder inst_3( .ssOut(HEX3), .nIn(new_secret[15:12]));
+SevenSegmentDisplayDecoder inst_4( .ssOut(HEX4), .nIn(new_secret[19:16]));
+SevenSegmentDisplayDecoder inst_5( .ssOut(HEX5), .nIn(new_secret[23:20]));
 
 endmodule
