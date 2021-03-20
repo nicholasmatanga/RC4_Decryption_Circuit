@@ -32,7 +32,7 @@ output [6:0] HEX4;
 output [6:0] HEX5;
 
 wire [23:0] new_secret;
-wire clk, start_machine, secret_enable;
+wire clk, start_machine, secret_enable, not_found;
 wire [7:0] secret_key [2:0];
 wire reset_n, wren, wren_1, wren_2, wren_3, start_decrypting;
 wire [7:0] address, data,address_1,address_2, address_3, data_1, data_2, data_3, rom_q, q;
@@ -45,11 +45,9 @@ assign secret_key[0] = new_secret[23:16];
 assign secret_key[1] = new_secret[15:8];
 assign secret_key[2] = new_secret[7:0];
 
-// assign secret_key[0] = 8'b0;
-// assign secret_key[1] = {6'b0, SW[9:8]};
-// assign secret_key[2] = SW[7:0];
 
-
+assign not_found = (new_secret == 24'h400000);
+assign LEDR[1] = not_found;
 assign address = start_decrypting ? address_3 : (start_machine ? address_2 : address_1);
 assign data = start_decrypting ? data_3 : (start_machine ? data_2 : data_1);
 assign wren = start_decrypting ? wren_3 : (start_machine ? wren_2 : wren_1);
@@ -78,6 +76,7 @@ to_main_s(
 swapping_state_machine
 change_memory(
     .clk(clk),
+    .not_found(not_found),
     .start_machine(start_machine),
     .reset(reset_n),
     .from_s_memory(q),

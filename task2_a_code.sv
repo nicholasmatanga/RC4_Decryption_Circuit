@@ -1,6 +1,6 @@
 `default_nettype none
 module swapping_state_machine (
-    input logic clk, start_machine,reset,
+    input logic clk, start_machine,reset, not_found,
     input logic [7:0] from_s_memory,
     input logic [7:0] secret_key [2:0],
     output logic [7:0] address, data,
@@ -73,7 +73,7 @@ end
 always_comb
 begin
     case(state)
-    WAIT:   if(start_machine) next_state = MOD_INDEX;
+    WAIT:   if(start_machine && !not_found) next_state = MOD_INDEX;
             else next_state = WAIT;
     MOD_INDEX: next_state = MOD_SECRET;
     MOD_SECRET: next_state = SUM_NUMBERS;
