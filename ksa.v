@@ -9,7 +9,7 @@ module ksa (
         HEX2,
         HEX3,
         HEX4,
-        HEX5,
+        HEX5
 );
 /////////////// CLOCK ////////////////////
 input CLOCK_50;
@@ -31,60 +31,98 @@ output [6:0] HEX3;
 output [6:0] HEX4;
 output [6:0] HEX5;
 
-logic clk, start_machine, enable;
-logic [7:0] secret_key [2:0];
-wire reset_n, wren, wren_1, wren_2;
-wire [7:0] address, data,address_1,address_2, data_1, data_2, q;
+wire clk;
+wire outer_finish, not_found;
+wire finish_1, finish_2, finish_3, finish_4, finish_5, finish_6;
+wire [23:0] new_secret, new_secret_1, new_secret_2, new_secret_3, new_secret_4, new_secret_5, new_secret_6;
 
+assign outer_finish = finish_1 | finish_2 | finish_3 | finish_4 | finish_5 | finish_6;
+assign LEDR[0] = outer_finish;
+assign LEDR[1] = not_found;
 assign clk = CLOCK_50;
-assign secret_key[0] = 8'b0;
-assign secret_key[1] = {6'b0, SW[9:8]};
-assign secret_key[2] = SW[7:0];
-assign enable = (!KEY[0]);
-assign reset_n = (!KEY[3]);
-assign address = start_machine ? address_2 : address_1;
-assign data = start_machine ? data_2 : data_1;
-assign wren = start_machine ? wren_2 : wren_1;
 
-////// Register for start bit //////////
-always@(posedge clk or posedge reset_n)
+////////// Code which chooses which secret key to display if there is a final result ///////////////////
+always@(*)
 begin
-    if(reset_n)
-    start_machine <= 1'b0;
-    else if(enable) 
-    start_machine <= 1'b1;
+    if(outer_finish)
+    begin
+        if(finish_1)
+            new_secret = new_secret_1;
+        else if(finish_2)
+            new_secret = new_secret_2;
+        else if(finish_3)
+            new_secret = new_secret_3;
+        else if(finish_4)
+            new_secret = new_secret_4;
+        else if(finish_5)
+            new_secret = new_secret_5;
+        else 
+            new_secret = new_secret_6;
+    end
+    else 
+        new_secret = new_secret_1;
 end
 
-//// State machine that initializes the S memory /////////////////////
-init_s_memory_state_machine
-to_main_s(
+
+/////////////// Decryption Core Instantiations ////////////////////////
+decryption_core_1
+core_1(
     .clk(clk),
-    .address(address_1),
-    .data(data_1),
-    .wren(wren_1)
+    .outer_finish(outer_finish),
+    .finish(finish_1),
+    .new_secret_1(new_secret_1)
 );
 
-///// State machine that swaps the S memory //////////////////////
-swapping_state_machine
-change_memory(
+decryption_core_2
+core_2(
     .clk(clk),
-    .start_machine(start_machine),
-    .reset(reset_n),
-    .from_memory(q),
-    .secret_key(secret_key),
-    .address(address_2),
-    .data(data_2),
-    .wren(wren_2)
+    .outer_finish(outer_finish),
+    .finish(finish_2),
+    .new_secret_2(new_secret_2)
 );
 
-///// S memory instantiation //////////////
-s_memory
-main_s (
-    .address(address),
-    .clock(clk),
-    .data(data),
-    .wren(wren),
-    .q(q)
+decryption_core_3
+core_3(
+    .clk(clk),
+    .outer_finish(outer_finish),
+    .finish(finish_3),
+    .new_secret_3(new_secret_3)
 );
+
+decryption_core_4
+core_4(
+    .clk(clk),
+    .outer_finish(outer_finish),
+    .finish(finish_4),
+    .new_secret_4(new_secret_4)
+);
+
+decryption_core_5
+core_5(
+    .clk(clk),
+    .outer_finish(outer_finish),
+    .finish(finish_5),
+    .new_secret_5(new_secret_5)
+);
+
+decryption_core_6
+core_6(
+    .clk(clk),
+    .outer_finish(outer_finish),
+    .finish(finish_6),
+    .new_secret_6(new_secret_6),
+    .not_found(not_found)
+);
+
+
+
+
+/////// Seven Segment Display /////////////
+SevenSegmentDisplayDecoder inst_0( .ssOut(HEX0), .nIn(new_secret[3:0]));
+SevenSegmentDisplayDecoder inst_1( .ssOut(HEX1), .nIn(new_secret[7:4]));
+SevenSegmentDisplayDecoder inst_2( .ssOut(HEX2), .nIn(new_secret[11:8]));
+SevenSegmentDisplayDecoder inst_3( .ssOut(HEX3), .nIn(new_secret[15:12]));
+SevenSegmentDisplayDecoder inst_4( .ssOut(HEX4), .nIn(new_secret[19:16]));
+SevenSegmentDisplayDecoder inst_5( .ssOut(HEX5), .nIn(new_secret[23:20]));
 
 endmodule
