@@ -41,6 +41,7 @@ initial state = WAIT;
 
 parameter [2:0] keylength = 3'b011;
 
+/////// i_index counter //////////////
 counter swap_counter(
             .clk(clk),
             .reset(reset),
@@ -95,6 +96,7 @@ begin
     endcase
 end
 
+//////////// Output for what happens when in a particular state /////////////////
 always@(posedge clk)
 begin
     if(reset)

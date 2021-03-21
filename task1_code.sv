@@ -61,13 +61,13 @@ endmodule
 
 //////////////// Counter ////////////////////////
 module counter
-#(parameter N = 8)
+#(parameter N = 8, M = 24'd0)
 (
             input logic clk, reset,count_enable,
             output logic [N-1:0] q
 );
 
-initial q = 0;
+initial q = M;
 
 always_ff@(posedge clk, posedge reset)
 begin

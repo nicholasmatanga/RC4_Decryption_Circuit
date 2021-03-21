@@ -915,6 +915,12 @@ set_global_assignment -name TIMEQUEST_DO_CCPP_REMOVAL ON
 set_global_assignment -name TIMEQUEST_MULTICORNER_ANALYSIS ON
 set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE lab4.stp
+set_global_assignment -name SYSTEMVERILOG_FILE decryption_core_6.sv
+set_global_assignment -name SYSTEMVERILOG_FILE decryption_core_5.sv
+set_global_assignment -name SYSTEMVERILOG_FILE decryption_core_4.sv
+set_global_assignment -name SYSTEMVERILOG_FILE decryption_core_3.sv
+set_global_assignment -name SYSTEMVERILOG_FILE decryption_core_2.sv
+set_global_assignment -name SYSTEMVERILOG_FILE decryption_core_1.sv
 set_global_assignment -name VERILOG_FILE SevenSegmentDisplayDecoder.v
 set_global_assignment -name SYSTEMVERILOG_FILE task2_b_code.sv
 set_global_assignment -name SYSTEMVERILOG_FILE task2_a_code.sv

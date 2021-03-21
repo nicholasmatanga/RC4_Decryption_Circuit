@@ -1,5 +1,6 @@
+`default_nettype none
 module decryption_state_machine(
-            input logic clk, start_machine,
+            input logic clk, start_machine, outer_finish,
             input logic [7:0] encrypted_input,
             input logic [7:0] from_s_memory,
             output logic [7:0] decrypted_output,
@@ -21,7 +22,7 @@ logic [7:0] si_value;
 logic [7:0] sj_value;
 logic [10:0] state, next_state;
 
-
+////////////// State_Encodings ////////////////////////////
 parameter [10:0] WAIT = 11'b00000_000000,
                 INCREMENT_I_INDEX = 11'b00001_000000,
                 WAIT_FOR_INC_I = 11'b00010_000000,
@@ -51,9 +52,8 @@ parameter [10:0] WAIT = 11'b00000_000000,
                 BUFFER_STATE = 11'b11010_000000,
                 CHECK_VALID = 11'b11011_000000,
                 KEY_ENABLE = 11'b11100_000000,
-                RESET_ALL = 11'b11110_001000;
-
-
+                RESET_ALL = 11'b11110_001000,
+                ELSE_FINISH = 11'b11111_000000;
 
 
 //////// Count for the k_index /////////
@@ -124,13 +124,16 @@ begin
     WRITE_TO_RESULT_RAM: next_state = WAIT_FOR_RESULT_RAM;
     WAIT_FOR_RESULT_RAM: next_state = CHECK_IF_DONE;
     CHECK_IF_DONE:  if(done) next_state = FINISHED;
+                    else if(outer_finish) next_state = ELSE_FINISH;
                     else next_state = INCREMENT_K_INDEX;
     INCREMENT_K_INDEX: next_state = INCREMENT_I_INDEX;
     FINISHED: next_state = FINISHED;
+    ELSE_FINISH: next_state = ELSE_FINISH;
     default: next_state = WAIT;
     endcase
 end
 
+//////////// Output for what happens when in a particular state /////////////////
 always@(posedge clk)
 begin
     if(reset)
